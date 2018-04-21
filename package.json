@@ -1,0 +1,24 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "api backend del proyecto redsocialNode",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Fabi",
+  "license": "MIT",
+  "dependencies": {
+    "async--await": "^1.0.2",
+    "bcrypt-node": "^0.1.0",
+    "body-parser": "^1.18.2",
+    "connect-multiparty": "^2.1.0",
+    "express": "^4.16.3",
+    "express-asyncify": "^1.0.0",
+    "jwt-simple": "^0.5.1",
+    "moment": "^2.21.0",
+    "mongoose": "^5.0.11",
+    "mongoose-pagination": "^1.0.0"
+  }
+}
