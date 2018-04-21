@@ -11,7 +11,7 @@ app.set('port', process.env.PORT || 3800); //setear el puerto de produccion o el
 
 //conexion con db
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb://localhost:27017/mean_social', {useMongoClient: true})
+mongoose.connect('mongodb://red-social-mean-2018-sf:red-social-mean-2018-sf@ds247759.mlab.com:47759/red-soc-mean-2018', {useMongoClient: true})
         .then(()=>{
             console.log('La conexion ha sido creada correctamente');
 
