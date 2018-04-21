@@ -6,7 +6,7 @@ var clave = 'clave_secreta_red_social_node';
 
 exports.ensureAuth = function(req, res, next){
     if(!req.headers.authorization){
-        return res.status(403).send({ message: 'La peticion no tiene cabecera de authenticacion'})
+        return res.status(403).send({ message: 'La peticion no tiene cabecera de autenticacion!'})
     }
 
     //quitamos las comillas
