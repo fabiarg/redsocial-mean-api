@@ -5,9 +5,8 @@ var mongoose = require('mongoose');
 var app = require('./app');
 const http = require('http'); //modulo nativo http
 
+var db = process.env.MONGODB_URI || 'mongodb://localhost:27017/mean_social';
 var server = http.createServer(app); //crear servidor
-
-var db = process.env.MONGODB_URI || 'mongodb://localhost:27017/mean_social';//db produccion o local
 
 app.set('port', process.env.PORT || 3800); //setear el puerto de produccion o el default
 
