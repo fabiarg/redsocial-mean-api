@@ -325,6 +325,7 @@ function uploadProfile(req, res){
         var file_ext = file_name.split('.')[1]; //jpg, png..*/
 
         //sin directorio de servidor
+        console.log(file_path)
         var file_path = req.files.image.path;
             var file_split = file_path.split('\\'); //ej:path\dir\nameimage.jpg ([path,dir,nameimage.jpg])
             var file_name = file_split[6]; //ej: nameimage.jpg
