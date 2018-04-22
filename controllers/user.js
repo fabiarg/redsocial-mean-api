@@ -337,34 +337,54 @@ function uploadProfile(req, res){
         if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg'){
             beforeImage(req.user.sub)
              .then((value)=>{
-                let v_pid_ext = value.image.split('\/'); //ej:dir/v145874/id_image.jpg ([dir, 145874, id_image.jpg])
-                let pid_ext = v_pid_ext[2];
-                let pid = pid_ext.split('.')[0];//id_image.jpg ([id_image])
+                 if(value.image == null){
+                      // File upload 
+                        cloudinary.uploader.upload(file_path, {tags:'basic_sample'}, {folder: 'profile', use_filename: true
+                        }).then(function(image){
+                            let image_uploaded = `v${image.version}/${image.public_id}.${image.format}`;
+                            //console.log(image_uploaded)
+                                //actualizar en db y directorio
+                                User.findByIdAndUpdate(userId, {image: image_uploaded}, {new:true}, (err, updateUser)=>{
+                                    if(err) return res.status(500).send({ message: 'Error en la peticion' });
+                                    if(!updateUser) return res.status(404).send({ message: 'No se pudo actualizar usuario'});
 
-                cloudinary.v2.uploader.destroy('profile/'+pid, function(error, result){
-                   //console.log(result) sin condicion por imagen-default
-                        // File upload 
-                       cloudinary.uploader.upload(file_path, {tags:'basic_sample'}, {folder: 'profile', use_filename: true
-                           })
-                        .then(function(image){
-                        let image_uploaded = `v${image.version}/${image.public_id}.${image.format}`;
-                        //console.log(image_uploaded)
-                            //actualizar en db y directorio
-                            User.findByIdAndUpdate(userId, {image: image_uploaded}, {new:true}, (err, updateUser)=>{
-                                if(err) return res.status(500).send({ message: 'Error en la peticion' });
-                                if(!updateUser) return res.status(404).send({ message: 'No se pudo actualizar usuario'});
+                                    return res.status(200).send({ user: updateUser });
+                                });
+                        }).catch(function(err){
+                            console.log();
+                            console.log("** File Upload (Promise)");
+                            if (err){ console.warn(err);}
+                        }); 
 
-                                return res.status(200).send({ user: updateUser });
-                            });
-                        })
-                        .catch(function(err){
-                        console.log();
-                        console.log("** File Upload (Promise)");
-                        if (err){ console.warn(err);}
-                        });              
-                });//destroy cloudinary
-                        
-            })
+                 }else{
+                    let v_pid_ext = value.image.split('\/'); //ej:dir/v145874/id_image.jpg ([dir, 145874, id_image.jpg])
+                    let pid_ext = v_pid_ext[2];
+                    let pid = pid_ext.split('.')[0];//id_image.jpg ([id_image])
+    
+                    cloudinary.v2.uploader.destroy('profile/'+pid, function(error, result){
+                       //console.log(result) sin condicion por imagen-default
+                            // File upload 
+                           cloudinary.uploader.upload(file_path, {tags:'basic_sample'}, {folder: 'profile', use_filename: true
+                               })
+                            .then(function(image){
+                            let image_uploaded = `v${image.version}/${image.public_id}.${image.format}`;
+                            //console.log(image_uploaded)
+                                //actualizar en db y directorio
+                                User.findByIdAndUpdate(userId, {image: image_uploaded}, {new:true}, (err, updateUser)=>{
+                                    if(err) return res.status(500).send({ message: 'Error en la peticion' });
+                                    if(!updateUser) return res.status(404).send({ message: 'No se pudo actualizar usuario'});
+    
+                                    return res.status(200).send({ user: updateUser });
+                                });
+                            })
+                            .catch(function(err){
+                            console.log();
+                            console.log("** File Upload (Promise)");
+                            if (err){ console.warn(err);}
+                            });              
+                    });//destroy cloudinary
+                 }                   
+            }) // then - before image
             .catch(
                 (error)=>{
                     console.log(error);
