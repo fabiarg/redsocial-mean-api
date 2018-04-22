@@ -19,6 +19,16 @@ var cloudinary = require('cloudinary');
 var cloudinary_config = require('../cloudinary.config');
 cloudinary_config.cloudinary_config;
 
+var Datauri = require('datauri');
+var multer = require('multer');
+/*var memoryStorage = multer.memoryStorage();
+var memoryUpload = multer({
+ storage: memoryStorage,
+ limits: {fileSize: 500000, files: 1}
+}).single('image');
+
+const dUri = new Datauri();*/
+
 
 function home(req, res){
     res.status(200).send({
@@ -334,7 +344,7 @@ function uploadProfile(req, res){
                 cloudinary.v2.uploader.destroy('profile/'+pid, function(error, result){
                    //console.log(result) sin condicion por imagen-default
                         // File upload 
-                       cloudinary.uploader.upload(file_path,  {tags:'basic_sample'}, {folder: 'profile', use_filename: true
+                       cloudinary.uploader.upload(file_path, {tags:'basic_sample'}, {folder: 'profile', use_filename: true
                            })
                         .then(function(image){
                         let image_uploaded = `v${image.version}/${image.public_id}.${image.format}`;
