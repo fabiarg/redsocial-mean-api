@@ -201,7 +201,7 @@ function uploadFilePublication(req, res){
         //sin directorio del servidor
         var file_path = req.files.image.path; // [path\dir\nameimage.jpg]
             var file_split = file_path.split('\\'); // [path, dir, nameimage.jpg]
-        var file_name = file_split[6]; //nameimage.jpg
+        var file_name = file_split[2]; //nameimage.jpg
         var file_ext = file_name.split('.')[1]; //?.jpg?.png
 
         if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg' || file_ext == 'gif'){

@@ -9,9 +9,6 @@ var multipart = require('connect-multiparty');
 var multipartMiddleware = multipart();
 //var md_upload = multipart({uploadDir: './uploads/users'}) para subir en directorio del servidor
 
-
-
-
 var api = express.Router();
 
 api.get('/', userController.home);
