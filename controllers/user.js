@@ -19,15 +19,6 @@ var cloudinary = require('cloudinary');
 var cloudinary_config = require('../cloudinary.config');
 cloudinary_config.cloudinary_config;
 
-var Datauri = require('datauri');
-var multer = require('multer');
-/*var memoryStorage = multer.memoryStorage();
-var memoryUpload = multer({
- storage: memoryStorage,
- limits: {fileSize: 500000, files: 1}
-}).single('image');
-
-const dUri = new Datauri();*/
 
 
 function home(req, res){
