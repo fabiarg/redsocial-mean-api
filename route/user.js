@@ -6,7 +6,8 @@ var userMiddleware = require('../midleware/authenticated');
 
 //conectar con el directorio para subir imagenes
 var multipart = require('connect-multiparty');
-var md_upload = multipart({uploadDir: './uploads/users'})
+var multipartMiddleware = multipart();
+//var md_upload = multipart({uploadDir: './uploads/users'}) para subir en directorio del servidor
 
 var api = express.Router();
 
@@ -19,7 +20,7 @@ api.get('/getUsers/:page?', userMiddleware.ensureAuth, userController.getUsers);
 api.get('/getUsersSearch/:search', userMiddleware.ensureAuth, userController.getUsersSearch);
 api.get('/countFollows/:id?', userMiddleware.ensureAuth, userController.countUserFollowsPubli);
 api.put('/updateUser/:id', userMiddleware.ensureAuth, userController.updateUser);
-api.post('/uploadProfile/:id', [userMiddleware.ensureAuth, md_upload], userController.uploadProfile);
+api.post('/uploadProfile/:id', [userMiddleware.ensureAuth, multipartMiddleware], userController.uploadProfile);
 api.get('/getImage/:imageFile', userController.getImageProfile);
 
 module.exports = api;

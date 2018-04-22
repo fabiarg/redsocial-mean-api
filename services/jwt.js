@@ -2,7 +2,9 @@
 
 var jwt = require('jwt-simple');
 var moment = require('moment');
-var clave = 'clave_secreta_red_social_node';
+var config = require('../config');
+var clave = config.SECRET_TOKEN;
+
 
 exports.createToken = function(user){
     var payload = {

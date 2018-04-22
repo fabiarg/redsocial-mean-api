@@ -15,6 +15,10 @@ var mongoose_pagination = require('mongoose-pagination');
 var fs = require('fs');
 var path = require('path');
 
+var cloudinary = require('cloudinary');
+var cloudinary_config = require('../cloudinary.config');
+cloudinary_config.cloudinary_config;
+
 
 function home(req, res){
     res.status(200).send({
@@ -304,10 +308,16 @@ function updateUser(req, res){
 function uploadProfile(req, res){
     var userId = req.params.id;
     if(req.files){
-        //si existe el archivo buscamos por la prop. image (parametro)
+        /*si existe el archivo buscamos por la prop. image (parametro)
         var file_path = req.files.image.path;
-            var file_split = file_path.split('\\');
-        var file_name = file_split[2]; //ej: nameimage.jpg
+            var file_split = file_path.split('\\'); //ej:path\dir\nameimage.jpg ([path,dir,nameimage.jpg])
+            var file_name = file_split[2]; //ej: nameimage.jpg
+        var file_ext = file_name.split('.')[1]; //jpg, png..*/
+
+        //sin directorio de servidor
+        var file_path = req.files.image.path;
+            var file_split = file_path.split('\\'); //ej:path\dir\nameimage.jpg ([path,dir,nameimage.jpg])
+            var file_name = file_split[6]; //ej: nameimage.jpg
         var file_ext = file_name.split('.')[1]; //jpg, png..
 
         if(userId != req.user.sub){
@@ -315,8 +325,43 @@ function uploadProfile(req, res){
         }
 
         if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg'){
+            beforeImage(req.user.sub)
+             .then((value)=>{
+                let v_pid_ext = value.image.split('\/'); //ej:dir/v145874/id_image.jpg ([dir, 145874, id_image.jpg])
+                let pid_ext = v_pid_ext[2];
+                let pid = pid_ext.split('.')[0];//id_image.jpg ([id_image])
+
+                cloudinary.v2.uploader.destroy('profile/'+pid, function(error, result){
+                   //console.log(result) sin condicion por imagen-default
+                        // File upload 
+                       cloudinary.uploader.upload(file_path,  {tags:'basic_sample'}, {folder: 'profile', use_filename: true
+                           })
+                        .then(function(image){
+                        let image_uploaded = `v${image.version}/${image.public_id}.${image.format}`;
+                        //console.log(image_uploaded)
+                            //actualizar en db y directorio
+                            User.findByIdAndUpdate(userId, {image: image_uploaded}, {new:true}, (err, updateUser)=>{
+                                if(err) return res.status(500).send({ message: 'Error en la peticion' });
+                                if(!updateUser) return res.status(404).send({ message: 'No se pudo actualizar usuario'});
+
+                                return res.status(200).send({ user: updateUser });
+                            });
+                        })
+                        .catch(function(err){
+                        console.log();
+                        console.log("** File Upload (Promise)");
+                        if (err){ console.warn(err);}
+                        });              
+                });//destroy cloudinary
+                        
+            })
+            .catch(
+                (error)=>{
+                    console.log(error);
+            }); 
+        
             //se busca la imagen anterior, se borra y se actualiza la imagen
-            var before_image = beforeImage(req.user.sub)
+           /* var before_image = beforeImage(req.user.sub)
              .then((value)=>{
                 console.log(value)
                  if(value.image == null){
@@ -353,7 +398,7 @@ function uploadProfile(req, res){
 
                         return res.status(200).send({ user: updateUser });
                     }); 
-                }); 
+                }); */
         }
         else{
             removeProfileUploads(res, file_path, 'extension de archivo invalido')
@@ -368,20 +413,33 @@ function uploadProfile(req, res){
 
 //function para obtener la imagen anterior
 async function beforeImage(userId){
-    var path = await User.findOne({'_id': userId}, 'image', (err, file)=>{
+    //obtener la imagen actual desde el servidor
+    /*var path = await User.findOne({'_id': userId}, 'image', (err, file)=>{
         if(err) return res.status(500).send({ message: 'Error en la peticion'});
         if(!file) return res.status(404).send({ message: 'sin imagen'});
         return file; // {_id:000.., image: loremipsum.jpg}
+    });*/
+
+    //obtener el id de la imagen actual desde el servidor con  cloudinary
+    var id_cloudinary = User.findOne({'_id': userId}, 'image', (err, file)=>{
+        if(err) return res.status(500).send({ message: 'Error en la peticion'});
+        if(!file) return res.status(404).send({ message: 'sin imagen'});
+
+        return file;
     });
 
-    return path;
+    return id_cloudinary;
 }
 
 //obtener imagen por su url
 function getImageProfile(req, res){
     var image_file = req.params.imageFile;
-    var image_path = './uploads/users/'+image_file;
+    
+    /*var image_cloudinary = 'http://res.cloudinary.com/dftu7s8cf/image/upload/'+image_file;
+    res.sendFile(path.resolve(image_cloudinary));*/
 
+    // verificar si la imagen existe en directorio del seridor (img default)
+    var image_path = './uploads/users/'+image_file;
     fs.exists(image_path, (exists)=>{
         if(exists){
             res.sendFile(path.resolve(image_path));

@@ -1,1 +1,4 @@
 node_modules/
+uploads/publications/*
+uploads/users/*
+!uploads/users/default-profile-user.png
