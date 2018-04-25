@@ -4,24 +4,24 @@ Api Rest usando NodeJS con Express y MongoDB para una red social basica
 
 # Used Technologies
 
-Nodejs
-Express
-Mongodb
+- Nodejs
+    - Express
+- Mongodb
 
 #Resources used in this project
-    express,
-    mongoose,
-    mongoose-pagination,
-    bcrypt-node,
-    body-parser,
-    cloudinary,
-    connect-multiparty,
-    jwt-simple,
-    moment,
+- Express,
+- Mongoose,
+- Mongoose-pagination,
+- Bcrypt-node,
+- Body-parser,
+- Cloudinary,
+- Connect-multiparty,
+- Jwt-simple,
+- Moment,
     
 
 ### Testing
-Agregar archivos config.js y cloudinary.config.js* en la raiz del proyecto.
+- Agregar archivos config.js y cloudinary.config.js* en la raiz del proyecto.
 
 config.js:
 ```js
