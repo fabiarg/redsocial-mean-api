@@ -3,5 +3,5 @@ uploads/publications/*
 uploads/users/*
 !uploads/users/default-profile-user.png
 
-config.js
-cloudinary.config.js
+.config.js
+.cloudinary.config.js
