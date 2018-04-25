@@ -19,6 +19,11 @@ api.get('/getPublicationUser/:user?/:page?', userMiddleware.ensureAuth, publicat
 api.delete('/deletePublication/:id', userMiddleware.ensureAuth, publicationsController.deletePublication);
 api.post('/uploadFilePublication/:id', [userMiddleware.ensureAuth, multipartMiddleware], publicationsController.uploadFilePublication);
 api.get('/get-file-publication/:imageFile', publicationsController.getImagePublication);
+api.get('/addLikePublication/:id', userMiddleware.ensureAuth, publicationsController.addLikePublication);
+api.get('/getLikesPublication/:id', userMiddleware.ensureAuth, publicationsController.getLikePublication);
+api.get('/getLikesAllPublications', userMiddleware.ensureAuth, publicationsController.getLikeAllPublications);
+api.delete('/deslikePublication/:id', userMiddleware.ensureAuth, publicationsController.deleteLikePublication);
+
 
 module.exports = api;
 

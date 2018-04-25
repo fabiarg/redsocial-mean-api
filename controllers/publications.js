@@ -1,3 +1,4 @@
+
 'use strict'
 
 //filesystem y path de node
@@ -10,6 +11,7 @@ var moment = require('moment');
 var Publications = require('../models/publications');
 var User = require('../models/users');
 var Follow = require('../models/follow');
+var Like = require('../models/likes');
 
 var cloudinary = require('cloudinary');
 var cloudinary_config = require('../cloudinary.config');
@@ -32,6 +34,7 @@ function savePublication(req, res){
     publication.user = req.user.sub;
     publication.created_at = moment().unix();
     publication.file = null;
+    publication.likes = 0;
 
     publication.save((err, publicationSaved)=>{
         if(err) return res.status(500).send({ message: 'Error interno del servidor'});
@@ -302,7 +305,141 @@ function countPublications(req, res){
     });
 }
 
+/**Likes en las publicaciones */
 
+function addLikePublication(req, res){
+    let userId = req.user.sub;
+    let publicationId = req.params.id;
+    
+
+    Like.find({ $and:[
+                { publication: publicationId },
+                { user: userId }
+                ]}
+    ).exec((err, likes)=>{
+        if(err) return res.status(200).send({ message: 'Error en la peticion de Likes'});
+        if(likes.length > 0){
+            return res.status(403).send({ message : 'El usuario ya likeo esta publicacion'})
+        }else{
+            //dar like a la publicacion una sola vez por usuario
+            getUserPublicationLike(publicationId, userId)
+            .then(
+                value => {
+                    if(value.userPub == null && value.likes != null){
+                        let countLikes = value.likes.likes;
+                        countLikes = countLikes + 1;
+
+                        let like = new Like();
+                        like.publication = publicationId;
+                        like.user = userId;
+                        like.created_at = moment.unix();
+                        Publications.findByIdAndUpdate(publicationId, {likes : countLikes}, {new: true},(err, updatePub)=>{
+                            if(err) return res.status(500).send({ message: 'Error en la peticion' });
+                            if(!updatePub) return res.status(404).send({ message: 'No se ha podido actualizar la publicacion'});
+                            
+                            like.save((err, likeSave)=>{
+                                if(err) if(err) return res.status(500).send({ message: 'Error en la peticion' });
+                                if(!likeSave) return res.status(404).send({ message: 'No se ha podido guardar la publicacion'});
+
+                                return res.status(200).send({ like: likeSave , publicationLike: updatePub });
+                            });
+
+                        });
+                    }      
+            });
+        }
+    });
+      
+}
+// Deslike publicacion
+function deleteLikePublication(req, res){
+    let userId = req.user.sub;
+    let publicationId = req.params.id;
+
+    //actualizar like en la publicacion
+    getUserPublicationLike(publicationId, userId).then(
+        value => {
+            if(value.likes != null){
+                let countLikes =  value.likes.likes - 1;
+                Publications.findByIdAndUpdate(publicationId, {likes :  countLikes}, {new: true},(err, updatePub)=>{
+                    if(err) return res.status(500).send({ message: 'Error en la peticion' });
+                    if(!updatePub) return res.status(404).send({ message: 'No se ha podido actualizar la publicacion'});
+
+                    Like.deleteOne({ publication : publicationId, user: userId}, (err)=>{
+                        if(err) return res.status(500).send({ message: 'Error en la peticion'});
+                
+                        res.status(200).send({ message: 'Like eliminado', updatePub });
+                    });
+
+                });
+            }
+        }
+    )
+
+}
+
+//funcion asincrona para obtener likes existentes de publicaciones y cantidad de likes de publicaciones
+     async function getUserPublicationLike(publicationId, userId){
+            let userPub = await Like.findOne({publication: publicationId, user: userId}, (err, result)=>{
+                if(err) return handleError(err);
+                return result;
+
+            });
+
+            let likes = await Publications.findOne({_id : publicationId}, 'likes', ((err, result)=>{
+                if(err) return handleError(err);
+
+                return result;
+            }));
+
+            return { userPub, likes};
+        }
+
+//likes de una publicacion especificada
+function getLikePublication(req, res){
+    //let userId = req.user.sub;
+    let publicationId = req.params.id;
+
+    Like.find({ publication : publicationId}).populate('user', 'name surname image').exec((err, result)=>{
+        if(err) return res.status(500).send({ message: 'Error en la peticion'});
+        if(!result) return res.status(404).send({ message: 'No se ha podido obtener los datos de la publicacion'});
+
+        return res.status(200).send({ publicationLike : result });
+    });
+}
+
+//todos los likes de todas las publicaciones
+function getLikeAllPublications(req, res){
+    let userId = req.user.sub;
+    Like.find().populate('user', 'name surname image').exec((err, result)=>{
+        if(err) return res.status(500).send({ message: 'Error en la peticion'});
+        if(!result) return res.status(404).send({ message: 'No se ha podido obtener los datos de la publicacion'});
+
+        usersLikesPublication(userId)
+        .then(
+            value=>{
+                if(value != null){
+                    return res.status(200).send({ publicationLike : result, likesUser: value });
+                }
+            });
+        
+    });
+}
+    async function usersLikesPublication(userId){
+        let usersPub = await Like.find({user: userId}, (err, result)=>{
+            if(err) return handleError(err);
+            return result;
+        });
+
+        //traer todas las publicaciones likeadas del usuario autenticado
+        let likes_idPublicationUser = [];
+        usersPub.forEach((item)=>{
+            likes_idPublicationUser.push(item.publication);
+        });
+
+
+        return likes_idPublicationUser;
+    }
 
 
 module.exports = {
@@ -313,5 +450,9 @@ module.exports = {
     getPublicationUser,
     deletePublication,
     uploadFilePublication,
-    getImagePublication
+    getImagePublication,
+    addLikePublication,
+    getLikePublication,
+    getLikeAllPublications,
+    deleteLikePublication
 }

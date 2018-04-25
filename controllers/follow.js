@@ -72,7 +72,7 @@ function getFollowingUsers(req, res){
        if(err) return res.status(500).send({ message: 'Error en la peticion'});
        if(!following) return res.status(404).send({ message: 'No se ha podido listar los usuaro seguidos'});
 
-       /*funcion asincrona para verificar si esos los ids de usuarios que sigue el usuario buscado 
+       /*funcion asincrona para verificar si los ids de usuarios que sigue el usuario buscado 
        tambien sigue el autenticado */
        followUserId(req.user.sub).then(
            value =>{

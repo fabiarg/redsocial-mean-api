@@ -328,6 +328,7 @@ function uploadProfile(req, res){
         if(file_ext == 'png' || file_ext == 'jpg' || file_ext == 'jpeg'){
             beforeImage(req.user.sub)
              .then((value)=>{
+                 console.log(value)
                  if(value.image == null){
                       // File upload 
                         cloudinary.uploader.upload(file_path, {tags:'basic_sample'}, {folder: 'profile', use_filename: true
