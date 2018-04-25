@@ -9,15 +9,15 @@ Api Rest usando NodeJS con Express y MongoDB para una red social basica
 - Mongodb
 
 #Resources used in this project
-- Express,
-- Mongoose,
-- Mongoose-pagination,
-- Bcrypt-node,
-- Body-parser,
-- Cloudinary,
-- Connect-multiparty,
-- Jwt-simple,
-- Moment,
+- Express
+- Mongoose
+- Mongoose-pagination
+- Bcrypt-node
+- Body-parser
+- Cloudinary
+- Connect-multiparty
+- Jwt-simple
+- Moment
     
 
 ### Testing
@@ -27,7 +27,7 @@ config.js:
 ```js
         module.exports = {
         port : process.env.PORT || 3000,
-        db : process.env.MONGODB_URI || 'mongodb://localhost:27017/api',
+        db : process.env.MONGODB_URI || 'mongodb://localhost:27017/api-example',
         SECRET_TOKEN: 'clave_secreta',
     }
 ```
